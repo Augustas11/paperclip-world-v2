@@ -62,7 +62,7 @@ Source: `pnpm dev` startup output from user's local machine (Mac)
 | `GET /api/agents` | Agent list (unprobed) |
 | `GET /api/runs` | Run list (unprobed) |
 | `GET /api/events` | Event stream (unprobed) |
-| `GET /api/plugins` | Plugin list (unprobed) |
+| `GET /api/plugins` | Plugin list ✓ |
 
 ### `GET /api/health` — Live Response
 
@@ -80,6 +80,65 @@ Source: `pnpm dev` startup output from user's local machine (Mac)
   }
 }
 ```
+
+### `GET /api/plugins` — Live Response
+
+One plugin installed:
+
+| Field | Value |
+|-------|-------|
+| ID | `342a341a-564d-4685-8da9-330f4c9033a1` |
+| Plugin key | `budget-lens` |
+| Package | `@tenet-ai/paperclip-plugin-budget-lens` |
+| Version | `0.1.0` |
+| API version | `1` |
+| Categories | `["ui"]` |
+| Status | `ready` |
+| Install order | `1` |
+| Installed at | `2026-03-19T08:05:44.357Z` |
+| Updated at | `2026-03-19T08:06:43.631Z` |
+| Package path | `/Users/augstar/paperclip/Paperclip/packages/plugins/budget-lens` |
+| Last error | `null` |
+
+#### Plugin: budget-lens — Manifest Detail
+
+**Description:** Real-time visibility into token spend — broken down by agent, issue, and project — with proactive budget alerts before the money is gone.
+
+**UI Slots:**
+
+| Slot ID | Type | Export | Display Name | Entity Types |
+|---------|------|--------|-------------|--------------|
+| `dashboard-overview` | `dashboardWidget` | `DashboardWidget` | Budget Lens — Cost Overview | — |
+| `issue-cost-tab` | `detailTab` | `IssueCostTab` | Cost | `issue` |
+| `agent-cost-tab` | `detailTab` | `AgentCostTab` | Cost | `agent` |
+| `budget-alerts-sidebar` | `sidebar` | `BudgetAlertsSidebar` | Budget Alerts | — |
+
+**Scheduled Jobs:**
+
+| Job key | Schedule | Description |
+|---------|----------|-------------|
+| `daily-snapshot` | `0 0 * * *` (daily midnight) | Refreshes company-level cost summaries and alert state |
+
+**Capabilities (declared):**
+
+```
+costs.read, companies.read, agents.read, issues.read, projects.read,
+events.subscribe, plugin.state.read, plugin.state.write, jobs.schedule,
+ui.dashboardWidget.register, ui.detailTab.register, ui.sidebar.register
+```
+
+**Instance Config Schema:**
+
+| Key | Type | Default | Range | Description |
+|-----|------|---------|-------|-------------|
+| `alertThresholdPct` | number | `80` | 10–100 | % of budget that triggers alert |
+| `trackingWindowDays` | number | `7` | 1–90 | Trailing days for sparkline/summary |
+
+**Entrypoints:**
+- UI: `./dist/ui`
+- Worker: `./dist/worker.js`
+
+---
 
 **Health fields decoded:**
 
@@ -137,12 +196,27 @@ paperclip/
 
 ---
 
+## Entity Types (inferred from plugin capabilities + UI slots)
+
+| Entity | Evidence |
+|--------|----------|
+| `company` | capability: `companies.read`; feature: `companyDeletionEnabled` |
+| `agent` | capability: `agents.read`; UI slot `agent-cost-tab` targets `entityTypes: ["agent"]` |
+| `issue` | capability: `issues.read`; UI slot `issue-cost-tab` targets `entityTypes: ["issue"]` |
+| `project` | capability: `projects.read` |
+| `cost` | capability: `costs.read`; plugin purpose is token spend tracking |
+| `event` | capability: `events.subscribe` |
+| `plugin.state` | capability: `plugin.state.read/write` |
+| `job` | capability: `jobs.schedule`; job: `daily-snapshot` |
+| `run` | endpoint `/api/runs` exists (unprobed) |
+
+---
+
 ## Gaps / Missing Information
 
 - Agent JWT not provisioned (`pnpm paperclipai onboard` not run)
-- `/api/agents`, `/api/runs`, `/api/events`, `/api/plugins` responses not yet captured
+- `/api/agents` and `/api/runs` responses not yet captured
 - `config.json` contents not read
-- No active agents or runs observed
 
 ---
 
