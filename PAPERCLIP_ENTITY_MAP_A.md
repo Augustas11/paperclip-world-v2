@@ -59,9 +59,9 @@ Source: `pnpm dev` startup output from user's local machine (Mac)
 |----------|---------|
 | `GET /api/health` | Health check |
 | `GET /api` | API root |
-| `GET /api/agents` | Agent list (unprobed) |
-| `GET /api/runs` | Run list (unprobed) |
-| `GET /api/events` | Event stream (unprobed) |
+| `GET /api/agents` | **404** — route does not exist |
+| `GET /api/runs` | **404** — route does not exist |
+| `GET /api/events` | Unprobed |
 | `GET /api/plugins` | Plugin list ✓ |
 
 ### `GET /api/health` — Live Response
@@ -191,7 +191,7 @@ paperclip/
 ## Filesystem State (on Mac, not accessible from sandbox)
 
 - `~/.paperclip/instances/default/db/PG_VERSION` — confirms embedded PG cluster exists
-- `~/.paperclip/instances/default/config.json` — instance config
+- `~/.paperclip/instances/default/config.json` — **does not exist** (likely written after onboarding/first login)
 - `~/.paperclip/instances/default/data/backups/` — automated DB backups
 
 ---
@@ -215,8 +215,9 @@ paperclip/
 ## Gaps / Missing Information
 
 - Agent JWT not provisioned (`pnpm paperclipai onboard` not run)
-- `/api/agents` and `/api/runs` responses not yet captured
-- `config.json` contents not read
+- `/api/events` unprobed
+- `config.json` does not exist on disk (likely written only after `onboard` or first login)
+- Actual API route structure unknown — `/api/agents` and `/api/runs` are not valid routes; real routes TBD
 
 ---
 
