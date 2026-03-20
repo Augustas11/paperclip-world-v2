@@ -53,17 +53,46 @@ Source: `pnpm dev` startup output from user's local machine (Mac)
 
 ---
 
-## Known API Endpoints (from startup output)
+## Known API Endpoints
 
 | Endpoint | Purpose |
 |----------|---------|
 | `GET /api/health` | Health check |
 | `GET /api` | API root |
+| `GET /api/agents` | Agent list (unprobed) |
+| `GET /api/runs` | Run list (unprobed) |
+| `GET /api/events` | Event stream (unprobed) |
+| `GET /api/plugins` | Plugin list (unprobed) |
 
-> Note: The running instance is on the local Mac and is not network-accessible
-> from this sandbox. Endpoint responses could not be captured directly.
-> Additional endpoints (`/api/agents`, `/api/runs`, `/api/events`, `/api/plugins`)
-> were not reachable for live probing.
+### `GET /api/health` — Live Response
+
+```json
+{
+  "status": "ok",
+  "version": "0.3.1",
+  "deploymentMode": "local_trusted",
+  "deploymentExposure": "private",
+  "authReady": true,
+  "bootstrapStatus": "ready",
+  "bootstrapInviteActive": false,
+  "features": {
+    "companyDeletionEnabled": true
+  }
+}
+```
+
+**Health fields decoded:**
+
+| Field | Value | Meaning |
+|-------|-------|---------|
+| `status` | `ok` | Server healthy |
+| `version` | `0.3.1` | Application version |
+| `deploymentMode` | `local_trusted` | No auth required for local access |
+| `deploymentExposure` | `private` | Not exposed to network |
+| `authReady` | `true` | Auth subsystem initialised |
+| `bootstrapStatus` | `ready` | Initial setup complete |
+| `bootstrapInviteActive` | `false` | No pending invite flow |
+| `features.companyDeletionEnabled` | `true` | Multi-tenant deletion feature on |
 
 ---
 
@@ -110,11 +139,10 @@ paperclip/
 
 ## Gaps / Missing Information
 
-- Live API responses not captured (server not reachable from this sandbox)
 - Agent JWT not provisioned (`pnpm paperclipai onboard` not run)
-- Plugin list unknown
-- Active runs/agents/events unknown
+- `/api/agents`, `/api/runs`, `/api/events`, `/api/plugins` responses not yet captured
 - `config.json` contents not read
+- No active agents or runs observed
 
 ---
 
